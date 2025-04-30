@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
 import path from 'path'
+import os from 'os'
 
 let clipboardPath: string | null = null
 let clipboardIsCut: boolean = false

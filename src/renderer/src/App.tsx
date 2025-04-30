@@ -6,7 +6,7 @@ import FileExplorer from './FileExplorer'
 
 const App = (): React.JSX.Element => {
   return (
-    <div className="App">
+    <div className="select-none">
       <FileExplorer />
     </div>
   )

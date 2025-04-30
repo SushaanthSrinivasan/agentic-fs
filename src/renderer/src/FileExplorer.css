@@ -1,0 +1,64 @@
+@import 'tailwindcss';
+
+:root {
+  --color-primary: #1d4ed8; /* Tailwind blue-700 */
+  --color-accent: #f43f5e; /* Tailwind rose-500 */
+  --sidebar-bg-color: #181918;
+  --sidebar-fg-color: #f8fafc;
+  --sidebar-hover-bg-color: #323332;
+  --sidebar-active-bg-color: #777777;
+  --mainpanel-bg-color: #212021;
+  --mainpanel-fg-color: #f8fafc;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.topbar {
+  background-color: var(--sidebar-bg-color);
+  color: var(--sidebar-fg-color);
+}
+
+.sidebar {
+  background-color: var(--sidebar-bg-color);
+  color: var(--sidebar-fg-color);
+}
+
+.mainpanel {
+  background-color: var(--mainpanel-bg-color);
+  color: var(--mainpanel-fg-color);
+}
+
+.file-item,
+.drive-item {
+  color: var(--sidebar-fg-color);
+}
+
+.file-item:hover,
+.drive-item:hover {
+  background-color: var(--sidebar-hover-bg-color);
+}
+
+/* Works in WebKit browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 100, 100, 0.4);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 100, 100, 0.6);
+}
