@@ -6,7 +6,16 @@ import os from 'os'
 const api = {
   getDirectoryContents: (dirPath: string) => ipcRenderer.invoke('get-directory-contents', dirPath),
   getHomeDir: () => os.homedir(),
-  getParentDir: (dirPath: string) => ipcRenderer.invoke('get-parent-dir', dirPath)
+  getParentDir: (dirPath: string) => ipcRenderer.invoke('get-parent-dir', dirPath),
+  createFolder: (dirPath: string, folderName: string) =>
+    ipcRenderer.invoke('create-folder', dirPath, folderName),
+  createFile: (dirPath: string, fileName: string) =>
+    ipcRenderer.invoke('create-file', dirPath, fileName),
+  openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
+  deletePath: (filePath: string) => ipcRenderer.invoke('delete-path', filePath),
+  copyPath: (filePath: string) => ipcRenderer.invoke('copy-path', filePath),
+  cutPath: (filePath: string) => ipcRenderer.invoke('cut-path', filePath),
+  pastePath: (targetDir: string) => ipcRenderer.invoke('paste-path', targetDir)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
