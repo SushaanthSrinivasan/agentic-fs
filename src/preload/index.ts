@@ -15,7 +15,8 @@ const api = {
   deletePath: (filePath: string) => ipcRenderer.invoke('delete-path', filePath),
   copyPath: (filePath: string) => ipcRenderer.invoke('copy-path', filePath),
   cutPath: (filePath: string) => ipcRenderer.invoke('cut-path', filePath),
-  pastePath: (targetDir: string) => ipcRenderer.invoke('paste-path', targetDir)
+  pastePath: (targetDir: string) => ipcRenderer.invoke('paste-path', targetDir),
+  askAgent: (userQuery: string) => ipcRenderer.invoke('ai-agent', userQuery)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

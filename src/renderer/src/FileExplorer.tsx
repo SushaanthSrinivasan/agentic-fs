@@ -6,8 +6,16 @@ import { BreadcrumbNav } from './BreadcrumbNav'
 import './FileExplorer.css'
 import { FileTextIcon } from './components/ui/file-text'
 import { FileStackIcon } from './components/ui/file-stack'
+import { Input } from './components/ui/input'
+import { ArchiveIcon } from './components/ui/archive'
+import { DownloadIcon } from './components/ui/download'
+import { AudioLinesIcon } from './components/ui/audio-lines'
+import { GalleryThumbnailsIcon } from './components/ui/gallery-thumbnails'
+import { ClapIcon } from './components/ui/clap'
+import { FileCheckIcon } from './components/ui/file-check'
+import { MonitorCheckIcon } from './components/ui/monitor-check'
+import { BoxesIcon } from './components/ui/boxes'
 
-// Type declaration for the exposed API
 declare global {
   interface Window {
     api: {
@@ -22,7 +30,7 @@ declare global {
         }[]
         error?: string
       }>
-      getParentDir: (dirPath: string) => Promise<string> // Just return a string (parent dir or error message)
+      getParentDir: (dirPath: string) => Promise<string>
       createFolder: (
         dirPath: string,
         folderName: string
@@ -37,35 +45,54 @@ declare global {
       cutPath: (filePath: string) => Promise<{ success: boolean }>
       pastePath: (targetDir: string) => Promise<{ success: boolean }>
       getHomeDir: () => Promise<string>
+      askAgent: (userQuery: string) => Promise<string>
     }
   }
 }
 
-// const fixedDrives = ['3D Objects', 'Desktop', 'Documents', 'Downloads', 'Music', 'Pictures', 'Videos', 'C:/', 'D:/', 'E:/']
-
 const fixedDrives = [
-  { name: '3D Objects', path: `${window.api.getHomeDir()}/3D Objects` },
-  { name: 'Desktop', path: `${window.api.getHomeDir()}/Desktop` },
-  { name: 'Documents', path: `${window.api.getHomeDir()}/Documents` },
-  { name: 'Downloads', path: `${window.api.getHomeDir()}/Downloads` },
-  { name: 'Music', path: `${window.api.getHomeDir()}/Music` },
-  { name: 'Pictures', path: `${window.api.getHomeDir()}/Pictures` },
-  { name: 'Videos', path: `${window.api.getHomeDir()}/Videos` },
-  { name: 'OS (C:)', path: 'C:/' },
-  { name: 'New Volume (D:)', path: 'D:/' },
-  { name: 'New Volume (E:)', path: 'E:/' }
+  {
+    name: '3D Objects',
+    path: `${window.api.getHomeDir()}/3D Objects`,
+    icon: <BoxesIcon size={20} />
+  },
+  {
+    name: 'Desktop',
+    path: `${window.api.getHomeDir()}/Desktop`,
+    icon: <MonitorCheckIcon size={20} />
+  },
+  {
+    name: 'Documents',
+    path: `${window.api.getHomeDir()}/Documents`,
+    icon: <FileCheckIcon size={20} />
+  },
+  {
+    name: 'Downloads',
+    path: `${window.api.getHomeDir()}/Downloads`,
+    icon: <DownloadIcon size={20} />
+  },
+  { name: 'Music', path: `${window.api.getHomeDir()}/Music`, icon: <AudioLinesIcon size={20} /> },
+  {
+    name: 'Pictures',
+    path: `${window.api.getHomeDir()}/Pictures`,
+    icon: <GalleryThumbnailsIcon size={20} />
+  },
+  { name: 'Videos', path: `${window.api.getHomeDir()}/Videos`, icon: <ClapIcon size={20} /> },
+  { name: 'OS (C:)', path: 'C:/', icon: <ArchiveIcon size={20} /> },
+  { name: 'New Volume (D:)', path: 'D:/', icon: <ArchiveIcon size={20} /> },
+  { name: 'New Volume (E:)', path: 'E:/', icon: <ArchiveIcon size={20} /> }
 ]
 
 const FileExplorer = (): React.JSX.Element => {
   const [currentDir, setCurrentDir] = useState<string>('C:/')
-  // const [items, setItems] = useState<{ type: 'file' | 'folder'; name: string }[]>([])
   const [creatingFolder, setCreatingFolder] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const [creatingFile, setCreatingFile] = useState(false)
   const [newFileName, setNewFileName] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [chatInput, setChatInput] = useState('')
+  const [msgArray, setMsgArray] = useState(['Hi, how can I help you?'])
   const [items, setItems] = useState<
     {
       name: string
@@ -76,8 +103,6 @@ const FileExplorer = (): React.JSX.Element => {
       error?: string
     }[]
   >([])
-
-  // console.log(`currentDir: ${currentDir}`)
 
   const handleNewFolderSubmit = async (): Promise<void> => {
     const trimmedName = newFolderName.trim()
@@ -136,10 +161,9 @@ const FileExplorer = (): React.JSX.Element => {
       const parentDir = await window.api.getParentDir(currentDir)
 
       if (parentDir.startsWith('Error:')) {
-        // If it's an error string
-        setError(parentDir) // Display the error message
+        setError(parentDir)
       } else if (parentDir !== currentDir) {
-        fetchDirectory(parentDir) // Proceed with the parent directory if it's valid
+        fetchDirectory(parentDir)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.')
@@ -148,7 +172,6 @@ const FileExplorer = (): React.JSX.Element => {
 
   const handleItemDoubleClick = (item: { type: 'file' | 'folder'; name: string }): void => {
     if (item.type === 'folder') {
-      // const newPath = join(currentDir, item.name)
       const newPath =
         currentDir.endsWith('/') || currentDir.endsWith('\\')
           ? `${currentDir}${item.name}`
@@ -224,6 +247,33 @@ const FileExplorer = (): React.JSX.Element => {
     }
   }
 
+  const sendMessage = async (): Promise<void> => {
+    console.log(`chat input: ${chatInput}`)
+
+    setMsgArray([...msgArray, chatInput])
+
+    const prompt = `You are an agentic file assistant who can do file operations. Help the user with what they need.
+User: ${chatInput}
+Current folder: ${currentDir}
+Parent folder of current folder: ${await window.api.getParentDir(currentDir)} 
+Operating system: Windows
+Context:
+Always keep in mind:
+- If the user is asking you to do something which requires you to run a CLI command, first cd into the current folder and then run the command with the flags which dont require user input. Eg: cd <current-folder-path> && npx create-next-app@latest <edit-name-here> --yes
+- If the user is asking you to remember a file, it means the file is in the current folder.
+- If the user is asking you to remind them about a file saved earlier, then open the file.
+`
+
+    const response = await window.api.askAgent(prompt)
+
+    if (response) {
+      setMsgArray([...msgArray, response])
+    }
+
+    setChatInput('')
+    fetchDirectory(currentDir)
+  }
+
   useEffect(() => {
     fetchDirectory(currentDir)
   }, [])
@@ -240,7 +290,7 @@ const FileExplorer = (): React.JSX.Element => {
         </div>
       </div>
 
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen">
         {/* Fixed Drive Sidebar */}
         <div className="w-64 p-4 overflow-auto sidebar">
           {/* <h2 className="text-xl font-semibold mb-4">Drives</h2> */}
@@ -251,7 +301,10 @@ const FileExplorer = (): React.JSX.Element => {
                 onClick={() => handleDriveClick(drive.path)}
                 className="mb-1 cursor-pointer p-1 rounded drive-item"
               >
-                <Button className="text-left w-full justify-start h-0.5">{drive.name}</Button>
+                <div className="flex items-center">
+                  {drive.icon}
+                  <Button className="text-left w-full justify-start h-0.5">{drive.name}</Button>
+                </div>
               </li>
             ))}
           </ul>
@@ -264,29 +317,21 @@ const FileExplorer = (): React.JSX.Element => {
             setCreatingFile(true)
             setNewFileName('newfile.txt')
             if (containerRef.current) {
-              // setTimeout(() => {
-              // containerRef.current?.scrollTo(0, 0)
               containerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
-              // }, 50)
             }
           }}
           onCreateFolder={() => {
             setCreatingFolder(true)
             setNewFolderName('New Folder')
             if (containerRef.current) {
-              // setTimeout(() => {
-              // containerRef.current?.scrollTo(0, 0)
               containerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
-
-              // }, 50)
             }
           }}
           onRefresh={() => {
             setItems([])
             setTimeout(() => {
               fetchDirectory(currentDir)
-            }, 75) // 1000 ms = 1 second
-            // fetchDirectory(currentDir)
+            }, 75)
           }}
           onPaste={() => {
             handlePaste(currentDir)
@@ -407,6 +452,53 @@ const FileExplorer = (): React.JSX.Element => {
             </div>
           </div>
         </NewContextMenu>
+
+        {/* Right Panel */}
+        <div className="w-80 p-4 rightpanel flex flex-col h-full">
+          <div className="flex-1 overflow-auto mb-2 space-y-2">
+            {/* Example messages */}
+            {msgArray.map((msg, index) => (
+              <div
+                key={index}
+                className="p-2 rounded self-start"
+                style={{ backgroundColor: `var(--sidebar-hover-bg-color)` }}
+              >
+                {msg}
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2 mb-10">
+            <Input
+              type="text"
+              className="flex-1 p-2 border rounded"
+              placeholder="Type a message..."
+              onChange={(e) => setChatInput(e.target.value)}
+              value={chatInput}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && chatInput.trim() !== '') {
+                  sendMessage()
+                }
+              }}
+            />
+            {/* <Button onClick={() => sendMessage()}>Send</Button> */}
+          </div>
+        </div>
+
+        {/* <div className="w-80 p-4 rightpanel">
+          <div className="flex-1 overflow-auto mb-2 space-y-2">
+            <div className="p-2 bg-gray-200 rounded self-start">Hi, how can I help?</div>
+            <div className="p-2 bg-blue-200 rounded self-end">Open Documents folder</div>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              className="flex-1 p-2 border rounded"
+              placeholder="Type a message..."
+              onChange={(e) => setChatInput(e.target.value)}
+            />
+            <Button onClick={() => sendMessage()}>Send</Button>
+          </div>
+        </div> */}
       </div>
     </div>
   )

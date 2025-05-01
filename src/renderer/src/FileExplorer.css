@@ -32,6 +32,11 @@ body {
   color: var(--mainpanel-fg-color);
 }
 
+.rightpanel {
+  background-color: var(--sidebar-bg-color);
+  color: var(--sidebar-fg-color);
+}
+
 .file-item,
 .drive-item {
   color: var(--sidebar-fg-color);

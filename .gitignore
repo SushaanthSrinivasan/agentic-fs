@@ -8,3 +8,5 @@ out
 .editorconfig
 .prettierignore
 .prettierrc.yaml
+.env
+backup
