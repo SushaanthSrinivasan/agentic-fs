@@ -15,6 +15,7 @@ import { ClapIcon } from './components/ui/clap'
 import { FileCheckIcon } from './components/ui/file-check'
 import { MonitorCheckIcon } from './components/ui/monitor-check'
 import { BoxesIcon } from './components/ui/boxes'
+import { ArrowLeftIcon } from './components/ui/arrow-left'
 
 declare global {
   interface Window {
@@ -284,7 +285,7 @@ Always keep in mind:
       <div className="w-full h-10 overflow-hidden topbar">
         <div className="flex items-center space-x-4">
           <Button onClick={goBack} className="cursor-pointer" variant="ghost">
-            ⬅
+            <ArrowLeftIcon size={16} />
           </Button>
           <BreadcrumbNav currentDir={currentDir} fetchDirectory={fetchDirectory} />
         </div>
